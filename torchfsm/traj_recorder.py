@@ -111,7 +111,7 @@ class AutoRecorder(_TrajRecorder):
     
     def _record(self,step:int,frame:torch.tensor):
         if not isinstance(self._trajectory,torch.Tensor):
-            self._trajectory.append(copy.deepcopy(frame))
+            self._trajectory.append(frame.clone())
         else:
             raise RuntimeError("The trajectory has been finalized.")
     
@@ -143,7 +143,7 @@ class CPURecorder(AutoRecorder):
     
     def _record(self,step:int,frame:torch.tensor):
         if frame.is_cpu:
-            self._trajectory.append(copy.deepcopy(frame))
+            self._trajectory.append(frame.clone())
         else:
             self._trajectory.append(frame.cpu())
 
@@ -187,7 +187,7 @@ class DiskRecorder(_TrajRecorder):
             if self.temp_cache_loc=="cpu" and not frame.is_cpu:
                 self._trajectory.append(frame.cpu())
             else:
-                self._trajectory.append(copy.deepcopy(frame))
+                self._trajectory.append(frame.clone())
         else:
             temp_cache=torch.stack(self._trajectory,dim=1)
             temp_cache=temp_cache.to("cpu") if not temp_cache.is_cpu else temp_cache
@@ -248,7 +248,7 @@ class RandomBatchWisedRecorder(_TrajRecorder):
             )
         for batch_i in range(self._batch_size):
             if step in self._recorded_frame_id[batch_i]:
-                self._trajectory[batch_i].append(copy.deepcopy(frame[batch_i]))     
+                self._trajectory[batch_i].append(frame[batch_i].clone())     
     
     @property
     def trajectory(self):
