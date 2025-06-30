@@ -7,3 +7,5 @@ from ._grad import Grad
 from ._laplacian import Laplacian
 from ._source import ImplicitSource
 from ._spatial_derivative import SpatialDerivative
+from ._dispersion import Dispersion
+from ._hyper_diffusion import HyperDiffusion
