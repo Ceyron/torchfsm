@@ -1,20 +1,37 @@
 from .operator import Laplacian, ImplicitSource, ExplicitSource, Operator
 from .mesh import FourierMesh, MeshGrid, mesh_shape
 import torch
-from typing import Union, Sequence, Optional
+from typing import Union, Sequence, Optional,Literal
 from ._type import SpatialTensor
 from .utils import clean_up_memory
+
+def normalize(
+    u: Union[SpatialTensor["B C H ..."],SpatialTensor["B C H ..."]],
+    normalize_mode=Literal["normal_distribution","-1_1","0_1"]
+    ):
+    if normalize_mode not in ["normal_distribution","-1_1","0_1"]:
+        raise ValueError(f"normalize_mode must be one of ['normal_distribution','-1_1','0_1'], but got {normalize_mode}")
+    if normalize_mode == "normal_distribution":
+        u = u - u.mean(dim=[i for i in range(1,u.ndim)],keepdim=True)
+        u = u / u.std(dim=[i for i in range(1,u.ndim)],keepdim=True)
+        return u
+    else:
+        shape=[u.shape[0]]+[1]*(len(u.shape)-1)
+        max_v=torch.max(u.view(u.size(0), -1), dim=1).values.view(shape)
+        min_v=torch.min(u.view(u.size(0), -1), dim=1).values.view(shape)
+        u = (u - min_v) / (max_v - min_v)
+        if normalize_mode == "-1_1":
+            u = u * 2 - 1
+        return u
 
 def diffused_noise(
     mesh: Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh],
     diffusion_coef: float = 1.0,
-    zero_centered: bool = True,
-    unit_variance: bool = False,
-    unit_magnitude: bool = True,
     device: Optional[torch.device] = None,
     dtype: Optional[torch.dtype] = None,
     batch_size: int = 1,
     n_channel: int = 1,
+    normalize_mode:Optional[Literal["normal_distribution","-1_1","0_1"]]=None,
 ) -> SpatialTensor["B C H ..."]:
     r"""
     Generate a diffused noise field.
@@ -25,20 +42,16 @@ def diffused_noise(
         mesh (Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh]): The mesh to generate the noise on.
             If a sequence is provided, it should be in the form of [(x_min, x_max, n_points), ...].
         diffusion_coef (float): The diffusion coefficient. Default is 1.0.
-        zero_centered (bool): If True, the noise will be zero-centered. Default is True.
-        unit_variance (bool): If True, the noise will have unit variance. Default is True.
-        unit_magnitude (bool): If True, the noise will have unit magnitude. Default is True.
-            unit_magnitude and unit_variance are mutually exclusive.
         device (Optional[torch.device]): The device to generate the noise on. Default is None.
         dtype (Optional[torch.dtype]): The data type of the generated noise. Default is None.
         batch_size (int): The number of batches. Default is 1.
         n_channel (int): The number of channels. Default is 1.
+        normalize_mode (Optional[Literal["normal_distribution","-1_1","0_1"]]): The normalization mode for the generated noise.
+            If None, no normalization is applied. Default is None.
 
     Returns:
         SpatialTensor["B C H ...]: The generated diffused noise field.
     """
-    if unit_magnitude and unit_variance:
-        raise ValueError("unit_magnitude and unit_variance are mutually exclusive.")
     if device is None and (isinstance(mesh, FourierMesh) or isinstance(mesh, MeshGrid)):
         device = mesh.device
     if dtype is None and (isinstance(mesh, FourierMesh) or isinstance(mesh, MeshGrid)):
@@ -52,12 +65,8 @@ def diffused_noise(
     u_0 = diffusion.integrate(u_0, dt=1, step=1, mesh=mesh)
     del diffusion
     clean_up_memory()
-    if zero_centered:
-        u_0 = u_0 - u_0.mean(dim=[i for i in range(1,u_0.ndim)],keepdim=True)
-    if unit_variance:
-        u_0 = u_0 / u_0.std(dim=[i for i in range(1,u_0.ndim)],keepdim=True)
-    if unit_magnitude:
-        u_0 = u_0 / torch.max(u_0.abs().view(u_0.size(0), -1), dim=1).values.view([u_0.shape[0]]+[1]*(len(u_0.shape)-1))
+    if normalize_mode is not None:
+        u_0 = normalize(u_0, normalize_mode=normalize_mode)
     return u_0
 
 def truncated_fourier_series(
@@ -65,13 +74,11 @@ def truncated_fourier_series(
     freq_threshold: int = 5,
     amplitude_range: tuple[int, int] = (-1.0, 1.0),
     angle_range: tuple[int, int] = (0.0, 2.0 * torch.pi),
-    zero_centered: bool = True,
-    unit_variance: bool = False,
-    unit_magnitude: bool = True,
     device: Optional[torch.device] = None,
     dtype: Optional[torch.dtype] = None,
     batch_size: int = 1,
     n_channel: int = 1,
+    normalize_mode=Optional[Literal["normal_distribution","-1_1","0_1"]],
 ) -> SpatialTensor["B C H ..."]:
     r"""
     Generate a truncated Fourier series noise field on a given mesh.
@@ -81,20 +88,16 @@ def truncated_fourier_series(
         freq_threshold (int): The frequency threshold for truncation.
         amplitude_range (tuple[int, int]): The range of amplitudes for the noise.
         angle_range (tuple[int, int]): The range of angles for the noise.
-        zero_centered (bool): If True, the noise will be zero-centered.
-        unit_variance (bool): If True, the noise will have unit variance.
-        unit_magnitude (bool): If True, the noise will have unit magnitude.
         device (Optional[torch.device]): The device on which to create the tensor.
         dtype (Optional[torch.dtype]): The data type of the tensor.
         batch_size (int): The number of batches.
         n_channel (int): The number of channels.
+        normalize_mode (Optional[Literal["normal_distribution","-1_1","0_1"]]): The normalization mode for the generated noise.
+            If None, no normalization is applied. Default is None.
     
     Returns:
         SpatialTensor["B C H ..."]: The generated noise field.
     """
-    if unit_magnitude and unit_variance:
-        raise ValueError("Cannot set both unit_magnitude and unit_variance to True.")
-    
     if device is None and (isinstance(mesh, FourierMesh) or isinstance(mesh, MeshGrid)):
         device = mesh.device
     if dtype is None and (isinstance(mesh, FourierMesh) or isinstance(mesh, MeshGrid)):
@@ -116,12 +119,8 @@ def truncated_fourier_series(
     fourier_noise = fourier_noise * mesh.abs_low_pass_filter(freq_threshold)
     mesh.abs_low_pass_filter.cache_clear()
     fourier_noise = mesh.ifft(fourier_noise).real
-    if zero_centered:
-        fourier_noise = fourier_noise - fourier_noise.mean(dim=[i for i in range(1,fourier_noise.ndim)],keepdim=True)
-    if unit_variance:
-        fourier_noise = fourier_noise / fourier_noise.std(dim=[i for i in range(1,fourier_noise.ndim)],keepdim=True)
-    if unit_magnitude:
-        fourier_noise = fourier_noise / torch.max(fourier_noise.abs().view(fourier_noise.size(0), -1), dim=1).values.view([fourier_noise.shape[0]]+[1]*(len(fourier_noise.shape)-1))
+    if normalize_mode is not None:
+        fourier_noise = normalize(fourier_noise, normalize_mode=normalize_mode)
     return fourier_noise
 
 
