@@ -824,9 +824,24 @@ class Operator(OperatorLike, _DeAliasMixin):
 
     def __init__(
         self,
-        operator_generators: Optional[ValueList[GeneratorLike]] = None,
+        operator_generators: Optional[Union[ValueList[GeneratorLike],ValueList[Union[LinearCoef, NonlinearFunc]]]] = None,
         coefs: Optional[List] = None,
     ) -> None:
+        if operator_generators is not None:
+            condition = False
+            if isinstance(operator_generators, list):
+                if isinstance(operator_generators[0], LinearCoef) or isinstance(
+                    operator_generators[0], NonlinearFunc
+                ):
+                    condition = True
+            elif isinstance(operator_generators, LinearCoef) or isinstance(operator_generators, NonlinearFunc):
+                operator_generators = [operator_generators]
+                condition = True
+            if condition:
+                operator_generators = [
+                    lambda f_mesh, n_channel: op
+                    for op in operator_generators
+                ]
         super().__init__(operator_generators, coefs)
 
     def __add__(self, other):
