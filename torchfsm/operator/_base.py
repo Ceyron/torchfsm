@@ -285,24 +285,24 @@ class OperatorLike(_MutableMixIn):
     Base class for All Operators.
 
     Args:
-        operator_generators (Optional[ValueList[GeneratorLike]]): List of operator generators. Default is None.
-            Each generator should be a callable that takes a Fourier mesh and number of channels as input and returns a linear coefficient or nonlinear function.
-        coefs (Optional[List]): List of coefficients for each operator generator. Default is None.
+        operator_cores (Optional[ValueList[Union[LinearCoef, NonlinearFunc, GeneratorLike]]]): List of operator generators/LinearCoef/NonLinearFunc. Default is None.
+            that represent the real manipulations.
+        coefs (Optional[List]): List of coefficients for each operator_core. Default is None.
             If None, all coefficients are set to 1.
-            The length of the list should match the number of operator generators.
+            The length of the list should match the number of operator_core.
 
     """
 
     def __init__(
         self,
-        operator_generators: Optional[ValueList[GeneratorLike]] = None,
+        operator_cores: Optional[ValueList[Union[LinearCoef, NonlinearFunc, GeneratorLike]]] = None,
         coefs: Optional[List] = None,
     ) -> None:
         super().__init__()
-        self.operator_generators = default(operator_generators, [])
-        if not isinstance(self.operator_generators, list):
-            self.operator_generators = [self.operator_generators]
-        self.coefs = default(coefs, [1] * len(self.operator_generators))
+        self.operator_cores = default(operator_cores, [])
+        if not isinstance(self.operator_cores, list):
+            self.operator_cores = [self.operator_cores]
+        self.coefs = default(coefs, [1] * len(self.operator_cores))
         self._state_dict = {
             "f_mesh": None,
             "n_channel": None,
@@ -337,10 +337,10 @@ class OperatorLike(_MutableMixIn):
 
     def _build_linear_coefs(self, linear_coefs: Optional[Sequence[LinearCoef]]):
         r"""
-        Build the linear coefficients based on the provided linear coefficient generators.
+        Build the linear coefficients.
 
         Args:
-            linear_coefs (Optional[Sequence[LinearCoef]]): List of linear coefficient generators.
+            linear_coefs (Optional[Sequence[LinearCoef]]): List of linear coefficients.
 
         """
         if len(linear_coefs) == 0:
@@ -359,10 +359,10 @@ class OperatorLike(_MutableMixIn):
         self, nonlinear_funcs: Optional[Sequence[NonlinearFunc]]
     ):
         r"""
-        Build the nonlinear functions based on the provided nonlinear function generators.
+        Build the nonlinear functions.
 
         Args:
-            nonlinear_funcs (Optional[Sequence[NonlinearFunc]]): List of nonlinear function generators.
+            nonlinear_funcs (Optional[Sequence[NonlinearFunc]]): List of nonlinear functions
         """
         if len(nonlinear_funcs) == 0:
             nonlinear_funcs_all = None
@@ -609,8 +609,15 @@ class OperatorLike(_MutableMixIn):
         )
         linear_coefs = []
         nonlinear_funcs = []
-        for coef, generator in zip(self.coefs, self.operator_generators):
-            op = generator(f_mesh, n_channel)
+        for coef, core in zip(self.coefs, self.operator_cores):
+            op = (
+                core(f_mesh, n_channel)
+                if (
+                    not isinstance(core, LinearCoef)
+                    and not isinstance(core, NonlinearFunc)
+                )
+                else core
+            )
             if isinstance(op, LinearCoef):
                 linear_coefs.append((coef, op))
             elif isinstance(op, NonlinearFunc):
@@ -631,15 +638,15 @@ class OperatorLike(_MutableMixIn):
         """
         self._value_mesh_check_func = func
 
-    def add_generator(self, generator: GeneratorLike, coef=1):
+    def add_core(self,core:Union[LinearCoef,NonlinearFunc,GeneratorLike],coef=1):
         r"""
         Add a generator to the operator.
 
         Args:
-            generator (GeneratorLike): Generator to be added. It should be a callable that takes a Fourier mesh and number of channels as input and returns a linear coefficient or nonlinear function.
+            core (Union[LinearCoef,NonlinearFunc,GeneratorLike]): Core to be added. 
             coef (float): Coefficient for the generator. Default is 1.
         """
-        self.operator_generators.append(generator)
+        self.operator_cores.append(core)
         self.coefs.append(coef)
 
     def set_integrator(
@@ -815,44 +822,30 @@ class Operator(OperatorLike, _DeAliasMixin):
     Operator class for linear and nonlinear operations.
 
     Args:
-        operator_generators (Optional[ValueList[GeneratorLike]]): List of operator generators. Default is None.
-            Each generator should be a callable that takes a Fourier mesh and number of channels as input and returns a linear coefficient or nonlinear function.
-        coefs (Optional[List]): List of coefficients for each operator generator. Default is None.
+        operator_cores (Optional[ValueList[Union[LinearCoef, NonlinearFunc, GeneratorLike]]]): List of operator generators/LinearCoef/NonLinearFunc. Default is None.
+            that represent the real manipulations.
+        coefs (Optional[List]): List of coefficients for each operator_core. Default is None.
             If None, all coefficients are set to 1.
-            The length of the list should match the number of operator generators.
+            The length of the list should match the number of operator_core.
+
     """
 
     def __init__(
         self,
-        operator_generators: Optional[Union[ValueList[GeneratorLike],ValueList[Union[LinearCoef, NonlinearFunc]]]] = None,
+        operator_cores: Optional[ValueList[Union[LinearCoef, NonlinearFunc, GeneratorLike]]] = None,
         coefs: Optional[List] = None,
     ) -> None:
-        if operator_generators is not None:
-            condition = False
-            if isinstance(operator_generators, list):
-                if isinstance(operator_generators[0], LinearCoef) or isinstance(
-                    operator_generators[0], NonlinearFunc
-                ):
-                    condition = True
-            elif isinstance(operator_generators, LinearCoef) or isinstance(operator_generators, NonlinearFunc):
-                operator_generators = [operator_generators]
-                condition = True
-            if condition:
-                operator_generators = [
-                    lambda f_mesh, n_channel: op
-                    for op in operator_generators
-                ]
-        super().__init__(operator_generators, coefs)
+        super().__init__(operator_cores, coefs)
 
     def __add__(self, other):
         if isinstance(other, OperatorLike):
             return Operator(
-                self.operator_generators + other.operator_generators,
+                self.operator_cores + other.operator_cores,
                 self.coefs + other.coefs,
             )
         elif isinstance(other, Tensor):
             return Operator(
-                self.operator_generators
+                self.operator_cores
                 + [lambda f_mesh, n_channel: _ExplicitSourceCore(other)],
                 self.coefs + [1],
             )
@@ -864,11 +857,11 @@ class Operator(OperatorLike, _DeAliasMixin):
             return NotImplemented
         else:
             return Operator(
-                self.operator_generators, [coef * other for coef in self.coefs]
+                self.operator_cores, [coef * other for coef in self.coefs]
             )
 
     def __neg__(self):
-        return Operator(self.operator_generators, [-1 * coef for coef in self.coefs])
+        return Operator(self.operator_cores, [-1 * coef for coef in self.coefs])
 
 
 class LinearOperator(OperatorLike, _InverseSolveMixin):
@@ -876,11 +869,10 @@ class LinearOperator(OperatorLike, _InverseSolveMixin):
     Operators that contain only linear operations.
 
     Args:
-        linear_coef (ValueList[Union[LinearCoef, GeneratorLike]]): List of linear coefficient generators. Default is None.
-            Each generator should be a callable that takes a Fourier mesh and number of channels as input and returns a linear coefficient.
-        coefs (Optional[List]): List of coefficients for each linear coefficient generator. Default is None.
+        linear_coef (ValueList[Union[LinearCoef, GeneratorLike]]): List of LinearCoef or linear coefficient generators. Default is None.
+        coefs (Optional[List]): List of coefficients for each linear_coef. Default is None.
             If None, all coefficients are set to 1.
-            The length of the list should match the number of linear coefficient generators.
+            The length of the list should match the number of linear_coef.
     """
 
     def __init__(
@@ -891,14 +883,7 @@ class LinearOperator(OperatorLike, _InverseSolveMixin):
         if not isinstance(linear_coef, list):
             linear_coef = [linear_coef]
         super().__init__(
-            operator_generators=[
-                (
-                    linear_coef_i
-                    if not isinstance(linear_coef_i, LinearCoef)
-                    else lambda f_mesh, n_channel: linear_coef_i
-                )
-                for linear_coef_i in linear_coef
-            ],
+            linear_coef,
             coefs=coefs,
         )
 
@@ -909,17 +894,17 @@ class LinearOperator(OperatorLike, _InverseSolveMixin):
     def __add__(self, other):
         if isinstance(other, LinearOperator):
             return LinearOperator(
-                self.operator_generators + other.operator_generators,
+                self.operator_cores + other.operator_cores,
                 self.coefs + other.coefs,
             )
         elif isinstance(other, OperatorLike):
             return Operator(
-                self.operator_generators + other.operator_generators,
+                self.operator_cores + other.operator_cores,
                 self.coefs + other.coefs,
             )
         elif isinstance(other, Tensor):
             return Operator(
-                self.operator_generators
+                self.operator_cores
                 + [lambda f_mesh, n_channel: _ExplicitSourceCore(other)],
                 self.coefs + [1],
             )
@@ -931,12 +916,12 @@ class LinearOperator(OperatorLike, _InverseSolveMixin):
             return NotImplemented
         else:
             return LinearOperator(
-                self.operator_generators, [coef * other for coef in self.coefs]
+                self.operator_cores, [coef * other for coef in self.coefs]
             )
 
     def __neg__(self):
         return LinearOperator(
-            self.operator_generators, [-1 * coef for coef in self.coefs]
+            self.operator_cores, [-1 * coef for coef in self.coefs]
         )
 
 
@@ -945,11 +930,10 @@ class NonlinearOperator(OperatorLike, _DeAliasMixin):
     Operators that contain only nonlinear operations.
 
     Args:
-        nonlinear_func (ValueList[Union[NonlinearFunc, GeneratorLike]]): List of nonlinear function generators. Default is None.
-            Each generator should be a callable that takes a Fourier mesh and number of channels as input and returns a nonlinear function.
-        coefs (Optional[List]): List of coefficients for each nonlinear function generator. Default is None.
+        nonlinear_func (ValueList[Union[NonlinearFunc, GeneratorLike]]): List of NonlinearFunc or nonlinear function generators. Default is None.
+        coefs (Optional[List]): List of coefficients for each nonlinear nonlinear_func. Default is None.
             If None, all coefficients are set to 1.
-            The length of the list should match the number of nonlinear function generators.
+            The length of the list should match the number of nonlinear nonlinear_func.
     """
 
     def __init__(
@@ -960,14 +944,7 @@ class NonlinearOperator(OperatorLike, _DeAliasMixin):
         if not isinstance(nonlinear_func, list):
             nonlinear_func = [nonlinear_func]
         super().__init__(
-            operator_generators=[
-                (
-                    nonlinear_func_i
-                    if not isinstance(nonlinear_func_i, NonlinearFunc)
-                    else lambda f_mesh, n_channel: nonlinear_func_i
-                )
-                for nonlinear_func_i in nonlinear_func
-            ],
+            nonlinear_func,
             coefs=coefs,
         )
 
@@ -978,17 +955,17 @@ class NonlinearOperator(OperatorLike, _DeAliasMixin):
     def __add__(self, other):
         if isinstance(other, NonlinearOperator):
             return NonlinearOperator(
-                self.operator_generators + other.operator_generators,
+                self.operator_cores + other.operator_cores,
                 self.coefs + other.coefs,
             )
         elif isinstance(other, OperatorLike):
             return Operator(
-                self.operator_generators + other.operator_generators,
+                self.operator_cores + other.operator_cores,
                 self.coefs + other.coefs,
             )
         elif isinstance(other, Tensor):
             return Operator(
-                self.operator_generators
+                self.operator_cores
                 + [lambda f_mesh, n_channel: _ExplicitSourceCore(other)],
                 self.coefs + [1],
             )
@@ -1000,12 +977,12 @@ class NonlinearOperator(OperatorLike, _DeAliasMixin):
             return NotImplemented
         else:
             return NonlinearOperator(
-                self.operator_generators, [coef * other for coef in self.coefs]
+                self.operator_cores, [coef * other for coef in self.coefs]
             )
 
     def __neg__(self):
         return NonlinearOperator(
-            self.operator_generators, [-1 * coef for coef in self.coefs]
+            self.operator_cores, [-1 * coef for coef in self.coefs]
         )
 
 
