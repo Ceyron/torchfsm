@@ -277,7 +277,7 @@ class _DeAliasMixin:
         """
 
         self._de_aliasing_rate = de_aliasing_rate
-        self._state_dict = None
+        self._state_dict = {key:None for key in self._state_dict.keys()}
 
 
 class OperatorLike(_MutableMixIn):
