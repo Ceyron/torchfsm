@@ -117,6 +117,7 @@ def random_select_frames(
         FourierArray["B T C H ..."],
     ],
     n_frames: int,
+    return_frame_indices: bool = False
 )-> Union[
         SpatialTensor["B n_frames C H ..."],
         SpatialArray["B n_frames C H ..."],
@@ -142,6 +143,8 @@ def random_select_frames(
     selected_frames = torch.randint(0, ori_len_time, (n_frames,))
     new_traj = traj[:, selected_frames]
     new_traj = new_traj.numpy() if is_nparray else new_traj
+    if return_frame_indices:
+        return new_traj, selected_frames
     return new_traj
 
 def uniformly_select_frames(
@@ -152,6 +155,7 @@ def uniformly_select_frames(
         FourierArray["B T C H ..."],
     ],
     n_frames: int,
+    return_frame_indices: bool = False
 )-> Union[
         SpatialTensor["B n_frames C H ..."],
         SpatialArray["B n_frames C H ..."],
@@ -177,6 +181,8 @@ def uniformly_select_frames(
     selected_frames = torch.linspace(0, ori_len_time - 1, n_frames).long()
     new_traj = traj[:, selected_frames]
     new_traj = new_traj.numpy() if is_nparray else new_traj
+    if return_frame_indices:
+        return new_traj, selected_frames
     return new_traj  
 
 def clean_up_memory():
