@@ -4,3 +4,4 @@ from ._navier_stokes import (VorticityConvection,
                              Vorticity2Pressure,
                              Vorticity2Velocity)
 from ._ks_convection import KSConvection
+from ._gray_scott import (ChannelWisedDiffusion, GrayScottSource)
