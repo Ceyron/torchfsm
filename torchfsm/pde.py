@@ -11,6 +11,7 @@ from .operator import (
     HyperDiffusion,
     ChannelWisedDiffusion,
     GrayScottSource,
+    Dispersion
 )
 from typing import Optional, Union
 from torch import Tensor
@@ -119,24 +120,24 @@ def KPPFisher(nu:Union[float,Tensor],r:Union[float,Tensor]) -> Operator:
     """
     return nu*Laplacian()+r*ImplicitSource(lambda phi:phi*(1-phi))
 
-def SwiftHohenberg(r:float) -> Operator:
+def SwiftHohenberg(r:Union[float,Tensor]) -> Operator:
     r"""
     Swift-Hohenberg equation:
         $$\frac{\partial \phi}{\partial t} = \nu \nabla^2 \phi + r \phi (1 - \phi)$$
 
     Args:
-        r (float): Control parameter.
+        r (Union[float,Tensor]): Control parameter.
 
     Returns:
         Operator: The operator representing the Swift-Hohenberg equation.
     """
     return -HyperDiffusion()-2*Laplacian()+ImplicitSource(lambda phi:r*phi-phi+phi**2-phi**3)
 
-def GrayScott(nu_0: float, 
-              nu_1:float, 
-              feed_rate:float, 
-              kill_rate:float, 
-              de_aliasing_rate=0.5) -> Operator:
+def GrayScott(nu_0: Union[float,Tensor], 
+              nu_1:Union[float,Tensor], 
+              feed_rate:Union[float,Tensor], 
+              kill_rate:Union[float,Tensor], 
+              de_aliasing_rate:float=0.5) -> Operator:
     r"""
     Gray-Scott equation:
         $$\begin{aligned}
@@ -146,10 +147,10 @@ def GrayScott(nu_0: float,
         $$
 
     Args:
-        nu_0 (float): Diffusion coefficient for \(\phi_0\).
-        nu_1 (float): Diffusion coefficient for \(\phi_1\).
-        feed_rate (float): Feed rate \(f\).
-        kill_rate (float): Kill rate \(k\).
+        nu_0 (Union[float,Tensor]): Diffusion coefficient for \(\phi_0\).
+        nu_1 (Union[float,Tensor]): Diffusion coefficient for \(\phi_1\).
+        feed_rate (Union[float,Tensor]): Feed rate \(f\).
+        kill_rate (Union[float,Tensor]): Kill rate \(k\).
         de_aliasing_rate (float): De-aliasing rate for the operator. Default is 0.5 due to the cubic nonlinearity.
 
     Returns:
@@ -159,3 +160,17 @@ def GrayScott(nu_0: float,
     op = ChannelWisedDiffusion([nu_0,nu_1])+ GrayScottSource(feed_rate, kill_rate)
     op.set_de_aliasing_rate(de_aliasing_rate) # GrayScottSource requires lower de-aliasing rate due to the cubic nonlinearity
     return op
+
+def KortewegDeVries(dispersivity:Union[float,Tensor]=-1,convection_coef:Union[float,Tensor]=6.0) -> Operator:
+    r""" Korteweg-De Vries equation:
+         $$\frac{\partial \mathbf{u}}{\partial t} = d \nabla \cdot (\nabla^2\mathbf{u}) +c \mathbf{u} \cdot \nabla \mathbf{u}$$
+
+    Args:
+        dispersivity (Union[float,Tensor]): Dispersion coefficient. Default is -1.
+        convection_coef (Union[float,Tensor]): Convection coefficient. Default is 6.0.    
+
+    Returns:
+        Operator: The operator representing the Korteweg-De Vries equation.
+    """
+
+    return dispersivity*Dispersion()+convection_coef*Convection()
