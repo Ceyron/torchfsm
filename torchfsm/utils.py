@@ -97,8 +97,8 @@ def random_clip_traj(
         Union[SpatialTensor, SpatialArray, FourierTensor, FourierArray]: The clipped trajectory.
             The clipped trajectory has shape [B, length, C, H, ...].
     """
-    if isinstance(traj, np.ndarray):
-        traj = torch.from_numpy(traj)
+    is_nparray = isinstance(traj, np.ndarray)
+    traj = torch.from_numpy(traj) if is_nparray else traj
     new_traj = []
     ori_len_time = traj.shape[1]
     start = torch.randint(0, ori_len_time - length, (traj.shape[0],))
@@ -106,8 +106,7 @@ def random_clip_traj(
     for i in range(traj.shape[0]):
         new_traj.append(traj[i, start[i] : end[i]])
     new_traj = torch.stack(new_traj, dim=0)
-    if isinstance(traj, np.ndarray):
-        new_traj = new_traj.numpy()
+    new_traj = new_traj.numpy() if is_nparray else new_traj
     return new_traj
 
 def random_select_frames(
@@ -137,13 +136,12 @@ def random_select_frames(
         Union[SpatialTensor, SpatialArray, FourierTensor, FourierArray]: The selected frames.
             The selected frames have shape [B, n_frames, C, H, ...].
     """
-    if isinstance(traj, np.ndarray):
-        traj = torch.from_numpy(traj)
+    is_nparray = isinstance(traj, np.ndarray)
+    traj = torch.from_numpy(traj) if is_nparray else traj
     ori_len_time = traj.shape[1]
     selected_frames = torch.randint(0, ori_len_time, (n_frames,))
     new_traj = traj[:, selected_frames]
-    if isinstance(traj, np.ndarray):
-        new_traj = new_traj.numpy()
+    new_traj = new_traj.numpy() if is_nparray else new_traj
     return new_traj
 
 def uniformly_select_frames(
@@ -173,13 +171,12 @@ def uniformly_select_frames(
         Union[SpatialTensor, SpatialArray, FourierTensor, FourierArray]: The selected frames.
             The selected frames have shape [B, n_frames, C, H, ...].
     """
-    if isinstance(traj, np.ndarray):
-        traj = torch.from_numpy(traj)
+    is_nparray = isinstance(traj, np.ndarray)
+    traj = torch.from_numpy(traj) if is_nparray else traj
     ori_len_time = traj.shape[1]
     selected_frames = torch.linspace(0, ori_len_time - 1, n_frames).long()
     new_traj = traj[:, selected_frames]
-    if isinstance(traj, np.ndarray):
-        new_traj = new_traj.numpy()
+    new_traj = new_traj.numpy() if is_nparray else new_traj
     return new_traj  
 
 def clean_up_memory():
