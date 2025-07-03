@@ -477,7 +477,26 @@ class FourierMesh:
             abs_f = self.bf[i].abs()
             mask *= torch.where(abs_f > abs_freq_threshold, 0, 1)
         return mask.to(device=self.device, dtype=self.dtype)
+    
+    @lru_cache()
+    def normalized_low_pass_filter(self, normalized_freq_threshold: float) -> torch.Tensor:
+        """
+        Low pass filter mask for the Fourier coefficients based on normalized frequency.
+        This is equivalent to the `abs_low_pass_filter` with abs_freq_threshold = normalized_freq_threshold/domain_length
 
+        The mask is a tensor of the same shape as the Fourier coefficients, with values 1 for frequencies below the threshold and 0 for frequencies above the threshold.
+        Args:
+            normalized_freq_threshold (float): The normalized frequency threshold for the low pass filter.
+
+        Returns:
+            torch.Tensor: A mask tensor with the same shape as the Fourier coefficients, where values are 1 for frequencies below the threshold and 0 for frequencies above the threshold.
+        """
+        mask = torch.ones_like(self.nabla().real)
+        for i in range(len(self.bf)):
+            abs_f = self.bf[i].abs()
+            mask *= torch.where(abs_f > normalized_freq_threshold/(self.mesh_info[i][1]-self.mesh_info[i][0]), 0, 1)
+        return mask.to(device=self.device, dtype=self.dtype)
+    
     def fft(self, u) -> FourierTensor["B C H ..."]:
         """
         Fast Fourier Transform
