@@ -6,7 +6,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.colors import Colormap, LinearSegmentedColormap, ListedColormap
 import torch, os, copy
 from .utils import default
-from ._type import SpatialTensor
+from ._type import SpatialTensor, SpatialArray
 from typing import Union, Optional, Sequence, Tuple, Callable, Literal, Annotated
 from mpl_toolkits.axes_grid1 import ImageGrid
 from warnings import warn
@@ -470,7 +470,7 @@ def plot_3D_field(
 
 def plot_traj(
     traj: Union[
-        SpatialTensor["B T C H ..."], Annotated[np.ndarray, "Spatial, B T C H ..."]
+        SpatialTensor["B T C H ..."], SpatialArray["B T C H ..."]
     ],
     channel_names: Optional[Sequence[str]] = None,
     batch_names: Optional[Sequence[str]] = None,
@@ -556,6 +556,7 @@ def plot_traj(
         cbar_location = "top"
         cbar_mode = "edge"
         ticklocation = "top"
+    cmap= mlp.colormaps[cmap] if isinstance(cmap, str) else cmap
     cmaps = [
         sym_colormap(vmins[i], vmaxs[i], cmap=cmap) if use_sym_colormap else cmap
         for i in range(n_channel)
@@ -814,7 +815,7 @@ def plot_traj(
 
 def plot_field(
     field: Union[
-        SpatialTensor["B C H ..."], Annotated[np.ndarray, "Spatial, B C H ..."]
+        SpatialTensor["B C H ..."], SpatialArray["B C H ..."]
     ],
     channel_names: Optional[Sequence[str]] = None,
     batch_names: Optional[Sequence[str]] = None,
