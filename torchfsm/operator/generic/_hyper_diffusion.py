@@ -11,7 +11,7 @@ class _HyperDiffusionCore(LinearCoef):
     def __call__(
         self, f_mesh: FourierMesh, n_channel: int
     ) -> FourierTensor["B C H ..."]:
-        return torch.cat([f_mesh.laplacian()] * n_channel)**2
+        return torch.cat([f_mesh.laplacian()] * n_channel,dim=1)**2
 
 
 class HyperDiffusion(LinearOperator):
