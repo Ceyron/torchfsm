@@ -583,7 +583,7 @@ def plot_traj(
             or show_ticks
         ):
             warn("Ticks are not supported for 3D trajectories.")
-        cmaps = [diverging_alpha(cmap) for cmap in cmaps]
+        #cmaps = [diverging_alpha(cmap) for cmap in cmaps]
     else:
         raise ValueError("Only support 1D, 2D, and 3D trajectories.")
     fig = plt.figure(figsize=(subfig_w * n_channel, subfig_h * batch_size))
@@ -988,7 +988,7 @@ def plot_traj_frames(
         subfig_w = subfig_size * w / h
         if ticks_x is not None or ticks_y is not None or show_ticks:
             warn("Ticks are not supported for 3D trajectories.")
-        cmaps = [diverging_alpha(cmap) for cmap in cmaps]
+        #cmaps = [diverging_alpha(cmap) for cmap in cmaps]
     else:
         raise ValueError("Only support 1D, 2D, and 3D trajectories.")
     if n_dim == 1:  # no_color_bar
