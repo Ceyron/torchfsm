@@ -1189,11 +1189,3 @@ def plot_3d_traj_slices(
         save_name=save_name,
         **kwargs,
     )
-
-
-plot_3d_traj_slices(
-    torch.randn((1, 30, 3, 32, 32, 32)),
-    n_frames=5,
-    channel_switch=(True, False, True),
-    aspect="equal",
-)
