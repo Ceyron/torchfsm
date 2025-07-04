@@ -5,7 +5,7 @@ import matplotlib.colors as colors
 from matplotlib.animation import FuncAnimation
 from matplotlib.colors import Colormap, LinearSegmentedColormap, ListedColormap
 import torch, os, copy
-from .utils import default
+from .utils import default, uniformly_select_frames
 from ._type import SpatialTensor, SpatialArray
 from typing import Union, Optional, Sequence, Tuple, Callable, Literal, Annotated
 from mpl_toolkits.axes_grid1 import ImageGrid
@@ -177,7 +177,7 @@ def generate_uniform_ticks(
         end (float): The end value of the ticks.
         n_tick (int): The number of ticks to generate.
         label_func (Callable[[np.number], str]): A function to format the tick labels.
-    
+
     Returns:
         Tuple[Sequence[float], Sequence[str]]: A tuple containing the tick positions and labels.
     """
@@ -199,7 +199,7 @@ def plot_1D_field(
     vmax: Optional[float] = None,
     extend_value_range: bool = True,
     grid=True,
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a 1D field.
@@ -219,7 +219,7 @@ def plot_1D_field(
         extend_value_range (bool, optional): Whether to extend the value range. Defaults to True.
         grid (bool, optional): Whether to show grid lines. Defaults to True.
         **kwargs: Additional keyword arguments for the plot.
-    
+
     """
     if isinstance(data, torch.Tensor):
         data = data.detach().cpu().numpy()
@@ -264,7 +264,7 @@ def plot_2D_field(
     show_ticks=True,
     ticks_x: Tuple[Sequence[float], Sequence[str]] = None,
     ticks_y: Tuple[Sequence[float], Sequence[str]] = None,
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a 2D field.
@@ -296,7 +296,7 @@ def plot_2D_field(
         cmap=cmap,
         origin="lower",
         aspect=aspect,
-        **kwargs
+        **kwargs,
     )
     if not show_ticks:
         ax.set_xticks([])
@@ -360,7 +360,7 @@ def _render(
     height=512,
     alpha_func: Literal["zigzag", "diverging", "linear"] = "zigzag",
     gamma_correction: float = 2.4,
-    **kwargs
+    **kwargs,
 ):
     if isinstance(cmap, str):
         cmap = mlp.colormaps[cmap]
@@ -383,7 +383,7 @@ def _render(
         background=background,  # transparent background
         vmin=vmin,
         vmax=vmax,
-        **kwargs
+        **kwargs,
     )
     img = ((img / 255.0) ** (gamma_correction) * 255).astype(np.uint8)
     return img
@@ -407,7 +407,7 @@ def plot_3D_field(
     height=512,
     alpha_func: Literal["zigzag", "diverging", "linear"] = "zigzag",
     gamma_correction: float = 2.4,
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a 3D field.
@@ -452,7 +452,7 @@ def plot_3D_field(
         height,
         alpha_func,
         gamma_correction,
-        **kwargs
+        **kwargs,
     )
     im = _plot_3D_field(
         ax,
@@ -469,9 +469,7 @@ def plot_3D_field(
 
 
 def plot_traj(
-    traj: Union[
-        SpatialTensor["B T C H ..."], SpatialArray["B T C H ..."]
-    ],
+    traj: Union[SpatialTensor["B T C H ..."], SpatialArray["B T C H ..."]],
     channel_names: Optional[Sequence[str]] = None,
     batch_names: Optional[Sequence[str]] = None,
     vmin: Union[float, Sequence[Optional[float]]] = None,
@@ -496,7 +494,7 @@ def plot_traj(
     show_in_notebook: bool = True,
     animation_engine: Literal["jshtml", "html5"] = "html5",
     save_name: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a trajectory. The dimension of the trajectory can be 1D, 2D, or 3D.
@@ -538,7 +536,9 @@ def plot_traj(
     channel_names = default(
         channel_names, ["channel {}".format(i) for i in range(n_channel)]
     )
-    batch_names = default(batch_names, ["batch {}".format(i) for i in range(batch_size)])
+    batch_names = default(
+        batch_names, ["batch {}".format(i) for i in range(batch_size)]
+    )
     if len(channel_names) != n_channel:
         raise ValueError(
             "The number of channel names should be equal to the number of channels in the input trajectory."
@@ -556,7 +556,7 @@ def plot_traj(
         cbar_location = "top"
         cbar_mode = "edge"
         ticklocation = "top"
-    cmap= mlp.colormaps[cmap] if isinstance(cmap, str) else cmap
+    cmap = mlp.colormaps[cmap] if isinstance(cmap, str) else cmap
     cmaps = [
         sym_colormap(vmins[i], vmaxs[i], cmap=cmap) if use_sym_colormap else cmap
         for i in range(n_channel)
@@ -650,7 +650,7 @@ def plot_traj(
                         ticks_y=ticks_x,
                         vmin=vmins[i_column],
                         vmax=vmaxs[i_column],
-                        **kwargs
+                        **kwargs,
                     )
                 title_t(i)
 
@@ -678,7 +678,7 @@ def plot_traj(
                     ticks_x=ticks_t,
                     ticks_y=ticks_x,
                     aspect=aspect,
-                    **kwargs
+                    **kwargs,
                 )
             set_colorbar()
             if save_name is not None:
@@ -713,7 +713,7 @@ def plot_traj(
                         ticks_x=ticks_x,
                         ticks_y=ticks_y,
                         aspect=aspect,
-                        **kwargs
+                        **kwargs,
                     )
                 set_colorbar()
                 title_t(i)
@@ -737,7 +737,7 @@ def plot_traj(
                     left_label=y_label,
                     aspect=aspect,
                     cmap=cmaps[i_column],
-                    **kwargs
+                    **kwargs,
                 )
             if save_name is not None:
                 plt.savefig(save_name)
@@ -757,7 +757,7 @@ def plot_traj(
                         traj[b, :, c, ...].astype(np.float32),
                         cmaps[c],
                         time=t,
-                        **kwargs
+                        **kwargs,
                     )
                 )
 
@@ -773,7 +773,7 @@ def plot_traj(
                     bottom_label=x_label,
                     left_label=y_label,
                     aspect=aspect,
-                    **kwargs
+                    **kwargs,
                 )
             title_t(i)
             set_colorbar()
@@ -814,9 +814,7 @@ def plot_traj(
 
 
 def plot_field(
-    field: Union[
-        SpatialTensor["B C H ..."], SpatialArray["B C H ..."]
-    ],
+    field: Union[SpatialTensor["B C H ..."], SpatialArray["B C H ..."]],
     channel_names: Optional[Sequence[str]] = None,
     batch_names: Optional[Sequence[str]] = None,
     vmin: Union[float, Sequence[Optional[float]]] = None,
@@ -835,13 +833,13 @@ def plot_field(
     ticks_y: Tuple[Sequence[float], Sequence[str]] = None,
     ticks_z: Tuple[Sequence[float], Sequence[str]] = None,
     save_name: Optional[str] = None,
-    **kwargs
+    **kwargs,
 ):
     """
     Plot a field. The dimension of the field can be 1D, 2D, or 3D.
 
     Args:
-        field (Union[SpatialTensor["B C H ...], Annotated[np.ndarray, "Spatial, B C H ..."]]): The field to plot.
+        field (Union[SpatialTensor["B C H ...], SpatialArray["B C H ..."]]): The field to plot.
         channel_names (Optional[Sequence[str]], optional): The names of the channels. Defaults to None.
         batch_names (Optional[Sequence[str]], optional): The names of the batches. Defaults to None.
         vmin (Union[float, Sequence[Optional[float]]], optional): The minimum value for the color scale. Defaults to None.
@@ -888,5 +886,314 @@ def plot_field(
         animation=True,
         show_time_index=False,
         save_name=save_name,
-        **kwargs
+        **kwargs,
     )
+
+
+def plot_traj_frames(
+    traj: Union[SpatialTensor["B C H ..."], SpatialArray["B C H ..."]],
+    n_frames: int = 5,
+    channel_names: Optional[Sequence[str]] = None,
+    time_prefix: str = "t=",
+    frame_start_index: int = 0,
+    vmin: Union[float, Sequence[Optional[float]]] = None,
+    vmax: Union[float, Sequence[Optional[float]]] = None,
+    subfig_size: float = 3.5,
+    x_space: float = 0.2,
+    y_space: float = 0.2,
+    cbar_pad: float = 0.1,
+    aspect: Literal["auto", "equal"] = "auto",
+    num_colorbar_value: int = 4,
+    ctick_format: Optional[str] = "%.1f",
+    show_ticks: Union[Literal["auto"], bool] = "auto",
+    cmap="coolwarm",
+    use_sym_colormap=True,
+    ticks_x: Tuple[Sequence[float], Sequence[str]] = None,
+    ticks_y: Tuple[Sequence[float], Sequence[str]] = None,
+    save_name: Optional[str] = None,
+    **kwargs,
+):
+    """
+    Plot frames of a trajectory. The dimension of the trajectory can be 1D, 2D, or 3D.
+
+    Args:
+        traj (Union[SpatialTensor["B C H ...], SpatialArray["B C H ..."]]): The trajectory to plot.
+        n_frames (int): The number of frames to plot.
+        channel_names (Optional[Sequence[str]], optional): The names of the channels. Defaults to None.
+        time_prefix (str, optional): The prefix for the time index in the title. Defaults to "t=".
+        frame_start_index (int, optional): The starting index for the frame numbers. Defaults to 0.
+        vmin (Union[float, Sequence[Optional[float]]], optional): The minimum value for the color scale. Defaults to None.
+        vmax (Union[float, Sequence[Optional[float]]], optional): The maximum value for the color scale. Defaults to None.
+        subfig_size (float, optional): The size of the subfigures. Defaults to 3.5.
+        x_space (float, optional): The space between subfigures in the x direction. Defaults to 0.2.
+        y_space (float, optional): The space between subfigures in the y direction. Defaults to 0.2.
+        cbar_pad (float, optional): The padding for the colorbar. Defaults to 0.1.
+        aspect (Literal["auto", "equal"], optional): The aspect ratio. Defaults to "auto".
+        num_colorbar_value (int, optional): The number of values for the colorbar. Defaults to 4.
+        ctick_format (Optional[str], optional): The format for the colorbar ticks. Defaults to "%.1f".
+        show_ticks (Union[Literal["auto"], bool], optional): Whether to show ticks. Defaults to "auto".
+        cmap (Union[str, Colormap], optional): The colormap to use. Defaults to "coolwarm".
+        use_sym_colormap (bool, optional): Whether to use a symmetric colormap. Defaults to True.
+        ticks_x (Tuple[Sequence[float], Sequence[str]], optional): Custom ticks for the x-axis. Defaults to None.
+        ticks_y (Tuple[Sequence[float], Sequence[str]], optional): Custom ticks for the y-axis. Defaults to None.
+        save_name (Optional[str], optional): The name of the file to save the plot. Defaults to None.
+        **kwargs: Additional keyword arguments for the plot.
+    """
+    if isinstance(traj, torch.Tensor):
+        traj = traj.cpu().detach().numpy()
+    if traj.ndim < 4:
+        raise ValueError("Trajectory must have at least 4 dimensions (B, T, C, H, ...)")
+    if traj.shape[1] < n_frames:
+        raise ValueError(
+            f"Trajectory has only {traj.shape[1]} frames, but {n_frames} are requested."
+        )
+    if traj.shape[0] != 1:
+        warn("Trajectory has batch size > 1, only the first batch will be plotted.")
+    frames, frame_indices = uniformly_select_frames(traj[0:1,], n_frames, True)
+    frames = frames[0]  # [T, C, H, ...]
+    n_dim = frames.ndim - 2
+    n_channel = frames.shape[1]
+    channel_names = default(channel_names, [f"Channel {i}" for i in range(n_channel)])
+    if vmin is None:
+        vmins = np.min(frames, axis=(0,) + tuple(range(2, n_dim + 2)))
+    else:
+        if len(vmin) != n_channel:
+            raise ValueError(
+                f"vmin must have {n_channel} elements, but got {len(vmin)}."
+            )
+        vmaxs = vmax
+    if vmax is None:
+        vmaxs = np.max(frames, axis=(0,) + tuple(range(2, n_dim + 2)))
+    else:
+        if len(vmax) != n_channel:
+            raise ValueError(
+                f"vmax must have {n_channel} elements, but got {len(vmax)}."
+            )
+        vmins = vmin
+    cmap = mlp.colormaps[cmap] if isinstance(cmap, str) else cmap
+    cmaps = [
+        sym_colormap(vmins[i], vmaxs[i], cmap=cmap) if use_sym_colormap else cmap
+        for i in range(n_channel)
+    ]
+    if show_ticks == "auto":
+        show_ticks = True if n_dim == 1 else False
+    subfig_h = subfig_size
+    if n_dim == 1:
+        subfig_w = subfig_size * 2
+    elif n_dim == 2:
+        subfig_w = subfig_size * traj.shape[-2] / traj.shape[-1]
+    elif n_dim == 3:
+        h = traj.shape[-3] + traj.shape[-3]
+        w = traj.shape[-2] + traj.shape[-1]
+        subfig_w = subfig_size * w / h
+        if ticks_x is not None or ticks_y is not None or show_ticks:
+            warn("Ticks are not supported for 3D trajectories.")
+        cmaps = [diverging_alpha(cmap) for cmap in cmaps]
+    else:
+        raise ValueError("Only support 1D, 2D, and 3D trajectories.")
+    if n_dim == 1:  # no_color_bar
+        fig = plt.figure(
+            figsize=(
+                (subfig_w) * n_frames + x_space * (n_frames - 1),
+                (subfig_h) * n_channel + y_space * (n_channel - 1),
+            )
+        )
+    else:
+        fig = plt.figure(
+            figsize=(
+                (subfig_w + x_space) * n_frames,
+                (subfig_h) * n_channel + y_space * (n_channel - 1),
+            )
+        )
+    grid = ImageGrid(
+        fig,
+        111,
+        nrows_ncols=(n_channel, n_frames),
+        axes_pad=(x_space, y_space),
+        share_all=True,
+        cbar_location="right",
+        cbar_mode=None if n_dim == 1 else "edge",
+        direction="row",
+        cbar_pad=cbar_pad,
+        aspect=False,
+    )
+
+    for i, ax_i in enumerate(grid):
+        channel_idx = i // n_frames
+        time_idx = i % n_frames
+        channel_name = channel_names[channel_idx] if time_idx == 0 else None
+        time_name = (
+            f"{time_prefix}{frame_indices[time_idx].item()+frame_start_index}"
+            if channel_idx == n_channel - 1
+            else None
+        )
+        data = frames[time_idx, channel_idx, :]
+        cmap = cmaps[channel_idx]
+        vmin = vmins[channel_idx].item()
+        vmax = vmaxs[channel_idx].item()
+        if n_dim == 1:
+            plot_1D_field(
+                ax_i,
+                data,
+                time_name,
+                channel_name,
+                show_ticks=show_ticks,
+                ticks_x=ticks_x,
+                ticks_y=ticks_y,
+                vmin=vmin,
+                vmax=vmax,
+                **kwargs,
+            )
+        elif n_dim == 2:
+            plot_2D_field(
+                ax_i,
+                data,
+                time_name,
+                channel_name,
+                aspect=aspect,
+                cmap=cmap,
+                show_ticks=show_ticks,
+                ticks_x=ticks_x,
+                ticks_y=ticks_y,
+                vmin=vmin,
+                vmax=vmax,
+                **kwargs,
+            )
+        elif n_dim == 3:
+            plot_3D_field(
+                ax_i,
+                data,
+                time_name,
+                channel_name,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                **kwargs,
+            )
+    if n_dim != 1:
+        for i in range(n_channel):
+            cb = grid.cbar_axes[i].colorbar(
+                mlp.cm.ScalarMappable(
+                    colors.Normalize(vmin=vmins[i], vmax=vmaxs[i]), cmap=cmaps[i]
+                ),
+                ticklocation="right",
+                format=ctick_format,
+            )
+            cb.ax.minorticks_on()
+            cb.set_ticks(
+                np.linspace(vmins[i], vmaxs[i], num_colorbar_value, endpoint=True)
+            )
+    if save_name is not None:
+        plt.savefig(save_name)
+    plt.show()
+
+
+def plot_3d_traj_slices(
+    traj: Union[SpatialTensor["B, T, C, H, W, D"], SpatialArray["B, T, C, H, W, D"]],
+    n_frames: int = 5,
+    channel_switch: Tuple[bool, bool, bool] = (True, True, True),
+    channel_names: Optional[Sequence[str]] = None,
+    time_prefix: str = "t=",
+    frame_start_index: int = 0,
+    vmin: Union[float, Sequence[Optional[float]]] = None,
+    vmax: Union[float, Sequence[Optional[float]]] = None,
+    subfig_size: float = 3.5,
+    x_space: float = 0.2,
+    y_space: float = 0.2,
+    cbar_pad: float = 0.1,
+    aspect: Literal["auto", "equal"] = "auto",
+    num_colorbar_value: int = 4,
+    ctick_format: Optional[str] = "%.1f",
+    show_ticks: Union[Literal["auto"], bool] = "auto",
+    cmap="coolwarm",
+    use_sym_colormap=True,
+    ticks_x: Tuple[Sequence[float], Sequence[str]] = None,
+    ticks_y: Tuple[Sequence[float], Sequence[str]] = None,
+    save_name: Optional[str] = None,
+    **kwargs,
+):
+    """
+    Plot slices of a 3D trajectory. The trajectory is sliced along the x, y, and z axes.
+
+    Args:
+        traj (Union[SpatialTensor["B, T, C, H, W, D"], SpatialArray["B, T, C, H, W, D"]]): The 3D trajectory to plot.
+        n_frames (int): The number of frames to plot.
+        channel_switch (Tuple[bool,bool,bool], optional): Whether to plot x-slice, y-slice, and z-slice. Defaults to (True, True, True).
+        channel_names (Optional[Sequence[str]], optional): The names of the channels. Defaults to None.
+        time_prefix (str, optional): The prefix for the time index in the title. Defaults to "t=".
+        frame_start_index (int, optional): The starting index for the frame numbers. Defaults to 0.
+        vmin (Union[float, Sequence[Optional[float]]], optional): The minimum value for the color scale. Defaults to None.
+        vmax (Union[float, Sequence[Optional[float]]], optional): The maximum value for the color scale. Defaults to None.
+        subfig_size (float, optional): The size of the subfigures. Defaults to 3.5.
+        x_space (float, optional): The space between subfigures in the x direction. Defaults to 0.2.
+        y_space (float, optional): The space between subfigures in the y direction. Defaults to 0.2.
+        cbar_pad (float, optional): The padding for the colorbar. Defaults to 0.1.
+        aspect (Literal["auto", "equal"], optional): The aspect ratio. Defaults to "auto".
+        num_colorbar_value (int, optional): The number of values for the colorbar. Defaults to 4.
+        ctick_format (Optional[str], optional): The format for the colorbar ticks. Defaults to "%.1f".
+        show_ticks (Union[Literal["auto"], bool], optional): Whether to show ticks. Defaults to "auto".
+        cmap (Union[str, Colormap], optional): The colormap to use. Defaults to "coolwarm".
+        use_sym_colormap (bool, optional): Whether to use a symmetric colormap. Defaults to True.
+        ticks_x (Tuple[Sequence[float], Sequence[str]], optional): Custom ticks for the x-axis. Defaults to None.
+        ticks_y (Tuple[Sequence[float], Sequence[str]], optional): Custom ticks for the y-axis. Defaults to None.
+        save_name (Optional[str], optional): The name of the file to save the plot. Defaults to None.
+        **kwargs: Additional keyword arguments for the plot.
+    """
+    if len(traj.shape) != 6:
+        raise ValueError(
+            "Only support 3D trajectories with 6 dimensions (B, T, C, H, W, D)."
+        )
+    slices = []
+    new_channel_names = []
+    half_x = traj.shape[-3] // 2
+    half_y = traj.shape[-2] // 2
+    half_z = traj.shape[-1] // 2
+    if channel_names is None:
+        channel_names = [f"Channel {i}" for i in range(traj.shape[2])]
+    for channel_idx in range(traj.shape[2]):
+        if channel_switch[0]:
+            slices.append(traj[:, :, channel_idx : channel_idx + 1, half_x, :, :])
+            new_channel_names.append(f"{channel_names[channel_idx]} (x-slice)")
+        if channel_switch[1]:
+            slices.append(traj[:, :, channel_idx : channel_idx + 1, :, half_y, :])
+            new_channel_names.append(f"{channel_names[channel_idx]} (y-slice)")
+        if channel_switch[2]:
+            slices.append(traj[:, :, channel_idx : channel_idx + 1, :, :, half_z])
+            new_channel_names.append(f"{channel_names[channel_idx]} (z-slice)")
+    if len(slices) == 0:
+        raise ValueError("No slices to plot. Check channel_switch settings.")
+    if isinstance(traj, torch.Tensor):
+        field = torch.cat(slices, dim=2).cpu().detach().numpy()
+    else:
+        field = np.concatenate(slices, axis=2)
+    plot_traj_frames(
+        field,
+        n_frames=n_frames,
+        channel_names=new_channel_names,
+        time_prefix=time_prefix,
+        frame_start_index=frame_start_index,
+        vmin=vmin,
+        vmax=vmax,
+        subfig_size=subfig_size,
+        x_space=x_space,
+        y_space=y_space,
+        cbar_pad=cbar_pad,
+        aspect=aspect,
+        num_colorbar_value=num_colorbar_value,
+        ctick_format=ctick_format,
+        show_ticks=show_ticks,
+        cmap=cmap,
+        use_sym_colormap=use_sym_colormap,
+        ticks_x=ticks_x,
+        ticks_y=ticks_y,
+        save_name=save_name,
+        **kwargs,
+    )
+
+
+plot_3d_traj_slices(
+    torch.randn((1, 30, 3, 32, 32, 32)),
+    n_frames=5,
+    channel_switch=(True, False, True),
+    aspect="equal",
+)
