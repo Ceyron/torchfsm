@@ -682,7 +682,7 @@ def plot_traj(
                 )
             set_colorbar()
             if save_name is not None:
-                plt.savefig(save_name)
+                plt.savefig(save_name, bbox_inches="tight")
             plt.show()
             return None
     elif n_dim == 2:
@@ -740,7 +740,7 @@ def plot_traj(
                     **kwargs,
                 )
             if save_name is not None:
-                plt.savefig(save_name)
+                plt.savefig(save_name, bbox_inches="tight")
             set_colorbar()
             plt.show()
             return None
@@ -809,7 +809,7 @@ def plot_traj(
     else:
         ani_func(0)
         if save_name is not None:
-            plt.savefig(save_name)
+            plt.savefig(save_name, bbox_inches="tight")
         plt.show()
 
 
@@ -1084,7 +1084,7 @@ def plot_traj_frames(
                 np.linspace(vmins[i], vmaxs[i], num_colorbar_value, endpoint=True)
             )
     if save_name is not None:
-        plt.savefig(save_name)
+        plt.savefig(save_name, bbox_inches="tight")
     plt.show()
 
 
