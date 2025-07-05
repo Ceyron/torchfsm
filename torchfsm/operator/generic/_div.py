@@ -13,6 +13,11 @@ class _DivCore(NonlinearFunc):
 
     def __init__(self):
         super().__init__(False)
+        """
+        Although the divergence is implemented as a nonlinear function, 
+        it is actually a linear operation where dealising is not required.
+        We implement it as a nonlinear function since its linear feature is a dot product operation, which is not supported by the spectral method.
+        """
 
     def __call__(
         self,
@@ -24,7 +29,6 @@ class _DivCore(NonlinearFunc):
 
 
 class _DivGenerator(CoreGenerator):
-
     r"""
     Generator of the Divergence operator.
         It ensures that divergence only works for vector fields with the same dimension as the mesh.
@@ -43,10 +47,10 @@ class _DivGenerator(CoreGenerator):
 class Div(NonlinearOperator):
     r"""
     `Div` calculates the divergence of a vector field.
-        It is defined as$\nabla \cdot \mathbf{u} = \sum_i \frac{\partial u_i}{\partial i}$.
+        It is defined as $\nabla \cdot \mathbf{u} = \sum_i \frac{\partial u_i}{\partial i}$.
         This operator only works for vector fields with the same dimension as the mesh.
         Note that this class is an operator wrapper. The actual implementation of the operator is in the `_DivCore` class.
-    
+
     """
 
     def __init__(self) -> None:
