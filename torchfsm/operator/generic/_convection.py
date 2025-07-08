@@ -42,10 +42,13 @@ class _ConvectionCore(NonlinearFunc):
         """
         if u is None:
             u = f_mesh.ifft(u_fft).real
-        nabla_u = f_mesh.nabla_vector(1).unsqueeze(2) * u_fft.unsqueeze(1)
-        return (u.unsqueeze(2) * f_mesh.ifft(nabla_u).real).sum(1)
-        # another way to calculate convection:
-        # return sum([u[:,i:i+1,...]*f_mesh.ifft(f_mesh.grad(i,1)*u_fft).real for i in range(n_channel)])
+        re=0.0
+        for i in range(u.shape[1]):
+            re += u[:,i:i+1,...]*f_mesh.ifft(f_mesh.grad(i,1)*u_fft).real
+        return re
+        # another way to calculate convection (slower and uses more memory):
+        #nabla_u = f_mesh.nabla_vector(1).unsqueeze(2) * u_fft.unsqueeze(1)
+        #return (u.unsqueeze(2) * f_mesh.ifft(nabla_u).real).sum(1)
 
 
 class _ConvectionGenerator(CoreGenerator):
