@@ -19,7 +19,7 @@ class _BiharmonicCore(LinearCoef):
 class Biharmonic(LinearOperator):
     r"""
     `Biharmonic` calculates the Biharmonic of a vector field. 
-        It is defined as $\nabla^4\mathbf{u}=\left[\begin{matrix}(\sum_{i=0}^I\frac{\partial^2}{\partial i^2 })(\sum_{j=0}^I\frac{\partial^2}{\partial j^2 })u_x \\ (\sum_{i=0}^I\frac{\partial^2}{\partial i^2 })(\sum_{j=0}^I\frac{\partial^2}{\partial j^2 })u_y \\ \cdots \\ (\sum_{i=0}^I\frac{\partial^2}{\partial i^2 })(\sum_{j=0}^I\frac{\partial^2}{\partial j^2 })u_i \\ \end{matrix} \right]$
+        It is defined as $\nabla^4\mathbf{u}=\left[\begin{matrix}(\sum_{i=0}^I\frac{\partial^2}{\partial i^2 })(\sum_{j=0}^I\frac{\partial^2}{\partial j^2 })u_x \\ (\sum_{i=0}^I\frac{\partial^2}{\partial i^2 })(\sum_{j=0}^I\frac{\partial^2}{\partial j^2 })u_y \\ \cdots \\ (\sum_{i=0}^I\frac{\partial^2}{\partial i^2 })(\sum_{j=0}^I\frac{\partial^2}{\partial j^2 })u_I \\ \end{matrix} \right]$
         Note that this class is an operator wrapper. The real implementation of the source term is in the `_BiharmonicCore` class.    
         
     """
