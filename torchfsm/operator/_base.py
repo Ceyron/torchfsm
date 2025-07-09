@@ -312,7 +312,6 @@ class OperatorLike(_MutableMixIn):
             "integrator": None,
             "invert_linear_coef": None,
         }
-        self._nonlinear_funcs = []
         self._de_aliasing_rate = 2 / 3
         self._value_mesh_check_func = lambda dim_value, dim_mesh: True
         self._integrator = "auto"
@@ -624,10 +623,9 @@ class OperatorLike(_MutableMixIn):
                 nonlinear_funcs.append((coef, op))
             else:
                 raise ValueError(f"Operator {op} is not supported")
-        self._nonlinear_funcs = nonlinear_funcs
         clean_up_memory()
         self._build_linear_coefs(linear_coefs)
-        self._build_nonlinear_funcs(self._nonlinear_funcs)
+        self._build_nonlinear_funcs(nonlinear_funcs)
 
     def register_additional_check(self, func: Callable[[int, int], bool]):
         r"""
