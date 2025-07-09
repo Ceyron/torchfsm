@@ -345,7 +345,7 @@ class FourierMesh:
 
     def set_default_rel_freq_threshold(self, threshold: float):
         self._default_rel_freq_threshold = threshold
-        self.low_pass_filter.cache_clear()
+        #self.low_pass_filter.cache_clear()
 
     @property
     def f_x(self) -> torch.Tensor:
@@ -396,21 +396,21 @@ class FourierMesh:
         """
         return self.bf.bf_vector
 
-    @lru_cache()
+    #@lru_cache()
     def grad(self, dim_i: int, order: int) -> FourierTensor["B C H ..."]:
         """
         Linear operator for the nth order gradient w.r.t the ith dimension.
         """
         return (2j * torch.pi * self.bf[dim_i]) ** order
 
-    @lru_cache()
+    #@lru_cache()
     def laplacian(self) -> FourierTensor["B C H ..."]:
         """
         Linear operator for the nth order Laplacian.
         """
         return self.nabla(2)
 
-    @lru_cache()
+    #@lru_cache()
     def invert_laplacian(self) -> FourierTensor["B C H ..."]:
         """
         Linear operator for the nth order inverse Laplacian.
@@ -418,14 +418,14 @@ class FourierMesh:
         lap = self.laplacian()
         return torch.where(lap == 0, 1.0, 1 / lap)
 
-    @lru_cache()
+    #@lru_cache()
     def nabla(self, order: int = 1) -> FourierTensor["B C H ..."]:
         """
         Linear operator for the nth order gradient.
         """
         return sum([self.grad(dim_i, order) for dim_i in range(len(self.bf))])
 
-    @lru_cache()
+    #@lru_cache()
     def invert_nabla(self, order: int = 1) -> FourierTensor["B C H ..."]:
         """
         Linear operator for the nth order inverse gradient.
@@ -433,14 +433,14 @@ class FourierMesh:
         nab = self.nabla(order)
         return torch.where(nab == 0, 1.0, 1 / nab)
 
-    @lru_cache()
+    #@lru_cache()
     def nabla_vector(self, order: int) -> FourierTensor["B C H ..."]:
         """
         Linear operator vector for the nth order gradient.
         """
         return (2j * torch.pi * self.bf.bf_vector) ** order
 
-    @lru_cache()
+    #@lru_cache()
     def low_pass_filter(self, rel_freq_threshold: Optional[float] = None) -> torch.Tensor:
         """
         Low pass filter mask for the Fourier coefficients.
@@ -460,7 +460,7 @@ class FourierMesh:
             mask *= torch.where(abs_f > abs_f.max() * rel_freq_threshold, 0, 1)
         return mask.to(device=self.device, dtype=self.dtype)
 
-    @lru_cache()
+    #@lru_cache()
     def abs_low_pass_filter(self, abs_freq_threshold: int) -> torch.Tensor:
         """
         Low pass filter mask for the Fourier coefficients.
@@ -478,7 +478,7 @@ class FourierMesh:
             mask *= torch.where(abs_f > abs_freq_threshold, 0, 1)
         return mask.to(device=self.device, dtype=self.dtype)
     
-    @lru_cache()
+    #@lru_cache()
     def normalized_low_pass_filter(self, normalized_freq_threshold: float) -> torch.Tensor:
         """
         Low pass filter mask for the Fourier coefficients based on normalized frequency.
@@ -513,6 +513,7 @@ class FourierMesh:
         """
         Move the mesh to a different device and dtype.
         """
+        """
         self.__init__(self.mesh_info, device=device, dtype=dtype)
         self.grad.cache_clear()
         self.laplacian.cache_clear()
@@ -521,6 +522,7 @@ class FourierMesh:
         self.invert_nabla.cache_clear()
         self.nabla_vector.cache_clear()
         self.low_pass_filter.cache_clear()
+        """
 
 
 def mesh_shape(

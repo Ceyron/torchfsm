@@ -103,10 +103,10 @@ def truncated_fourier_series(
 
     if normalized_freq:
         filter = mesh.normalized_low_pass_filter(freq_threshold)
-        mesh.normalized_low_pass_filter.cache_clear()
+        #mesh.normalized_low_pass_filter.cache_clear()
     else:
         filter =  mesh.abs_low_pass_filter(freq_threshold)
-        mesh.abs_low_pass_filter.cache_clear()
+        #mesh.abs_low_pass_filter.cache_clear()
     
     return truncated_fourier_series_customed_filter(
         mesh=mesh,
@@ -160,13 +160,13 @@ def random_truncated_fourier_series(
             mesh.normalized_low_pass_filter(random.randint(min_freq, max_freq + 1))
             for _ in range(batch_size)
         ], dim=0)
-        mesh.normalized_low_pass_filter.cache_clear()
+        #mesh.normalized_low_pass_filter.cache_clear()
     else:
         filter = torch.cat([
             mesh.abs_low_pass_filter(random.randint(min_freq, max_freq + 1))
             for _ in range(batch_size)
         ], dim=0)
-        mesh.abs_low_pass_filter.cache_clear()
+        #mesh.abs_low_pass_filter.cache_clear()
     
     return truncated_fourier_series_customed_filter(
         mesh=mesh,
