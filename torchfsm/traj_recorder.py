@@ -168,12 +168,12 @@ class CPURecorder(AutoRecorder):
     def _record(self, step: int, frame: torch.tensor):
         if frame.is_cpu:
             if self.real_time_ifft and not self.return_in_fourier:
-                self._trajectory.append(self._field_ifft(frame.clone()))
+                self._trajectory.append(self._field_ifft(frame.clone()).real)
             else:
                 self._trajectory.append(frame.clone())
         else:
             if self.real_time_ifft and not self.return_in_fourier:
-                self._trajectory.append(self._field_ifft(frame.cpu()))
+                self._trajectory.append(self._field_ifft(frame.cpu()).real)
             else:
                 self._trajectory.append(frame.cpu())
 
