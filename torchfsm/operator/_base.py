@@ -738,6 +738,8 @@ class OperatorLike(_MutableMixIn):
             for i in p_bar:
                 if trajectory_recorder is not None:
                     trajectory_recorder.record(i, u_0_fft)
+                    if trajectory_recorder._shutdown_flag:
+                        break
                 u_0_fft = self._state_dict["integrator"].forward(u_0_fft, dt)
                 if nan_check:
                     if torch.isnan(u_0_fft).any():

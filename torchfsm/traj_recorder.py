@@ -48,6 +48,14 @@ class _TrajRecorder:
         else:
             self.control_func = lambda step: False if step == 0 else control_func(step)
         self.return_in_fourier = False
+        self._shutdown_flag = False
+        
+    def set_shutdown_flag(self):
+        """
+        Set the shutdown flag to True.
+            This will prevent any further recording of trajectories.
+        """
+        self._shutdown_flag = True
 
     def record(self, step: int, frame: torch.tensor):
         """
