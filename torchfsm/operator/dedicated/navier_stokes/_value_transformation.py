@@ -1,4 +1,4 @@
-from .._base import (
+from ..._base import (
     CoreGenerator,
     NonlinearFunc,
     NonlinearOperator,
@@ -6,69 +6,12 @@ from .._base import (
     LinearOperator,
     OperatorLike,
 )
-from ...mesh import FourierMesh
+from ....mesh import FourierMesh
 import torch
 from typing import Optional
-from ..._type import FourierTensor, SpatialTensor
-from ..generic._convection import _ConvectionCore
-from ..._type import FourierTensor, SpatialTensor
-
-
-# Vorticity Convection
-class _VorticityConvectionCore(NonlinearFunc):
-
-    r"""
-    Implementation of the VorticityConvection operator.
-    """
-
-    def __init__(self) -> None:
-        super().__init__()
-
-    def __call__(
-        self,
-        u_fft: FourierTensor["B C H ..."],
-        f_mesh: FourierMesh,
-        u: Optional[SpatialTensor["B C H ..."]]=None,
-    ) -> FourierTensor["B C H ..."]:
-        return f_mesh.fft(self.spatial_value(u_fft, f_mesh, u))
-
-    def spatial_value(
-        self,
-        u_fft: FourierTensor["B C H ..."],
-        f_mesh: FourierMesh,
-        u: Optional[SpatialTensor["B C H ..."]]=None,
-    ) -> SpatialTensor["B C H ..."]:
-        psi = -u_fft * f_mesh.invert_laplacian()
-        ux = f_mesh.ifft(f_mesh.grad(1, 1) * psi).real
-        uy = f_mesh.ifft(-f_mesh.grad(0, 1) * psi).real
-        grad_x_w = f_mesh.ifft(f_mesh.grad(0, 1) * u_fft).real
-        grad_y_w = f_mesh.ifft(f_mesh.grad(1, 1) * u_fft).real
-        return ux * grad_x_w + uy * grad_y_w
-
-
-class _VorticityConvectionGenerator(CoreGenerator):
-
-    r"""
-    Generator of the VorticityConvection operator. 
-        It ensures that the operator is only applied to scalar vorticity fields in 2D.
-    """
-
-    def __call__(self, f_mesh: FourierMesh, n_channel: int) -> NonlinearFunc:
-        if f_mesh.n_dim != 2 or n_channel != 1:
-            raise ValueError("Only vorticity in 2Dmesh is supported")
-        return _VorticityConvectionCore()
-
-
-class VorticityConvection(NonlinearOperator):
-
-    r"""
-    Operator for vorticity convection in 2D. 
-        It is defined as $(\mathbf{u}\cdot\nabla) \omega$ where $\omega$ is the vorticity and $\mathbf{u}$ is the velocity.
-        Note that this class is an operator wrapper. The real implementation of the source term is in the `_VorticityConvectionCore` class.
-    """
-
-    def __init__(self) -> None:
-        super().__init__(_VorticityConvectionGenerator())
+from ...._type import FourierTensor, SpatialTensor
+from ...generic._convection import _ConvectionCore
+from ...._type import FourierTensor, SpatialTensor
 
 
 # Vorticity To Velocity
@@ -215,54 +158,3 @@ class Velocity2Pressure(NonlinearOperator):
 
     def __init__(self, external_force: Optional[OperatorLike] = None) -> None:
         super().__init__(_Velocity2PressureCore(external_force))
-
-
-# Velocity Convection
-class _NSPressureConvectionCore(NonlinearFunc):
-    r"""
-    Implementation of the Navier-Stokes pressure convection operator.
-    """
-
-    def __init__(self, external_force: Optional[OperatorLike] = None) -> None:
-        super().__init__(dealiasing_swtich=external_force is None)
-        self.external_force = external_force
-        self._convection = _ConvectionCore()
-
-    def __call__(
-        self,
-        u_fft: FourierTensor["B C H ..."],
-        f_mesh: FourierMesh,
-        u: Optional[SpatialTensor["B C H ..."]] = None,
-    ) -> torch.Tensor:
-        if self.external_force is not None:  # u_fft is original version
-            force = self.external_force(
-                u_fft=u_fft, mesh=f_mesh, return_in_fourier=True
-            )
-            u_fft *= f_mesh.low_pass_filter()
-            u = f_mesh.ifft(u_fft).real
-        else:  # u_fft is dealiased version
-            if u is None:
-                u = f_mesh.ifft(u_fft).real
-        convection = self._convection(u_fft, f_mesh,u)
-        if self.external_force is not None:
-            convection -= force
-        p = f_mesh.invert_laplacian() * torch.sum(
-            f_mesh.nabla_vector(1) * convection, dim=1, keepdim=True
-        )  # - p = nabla.(u.nabla_u)/laplacian
-        if self.external_force is not None:
-            return f_mesh.nabla_vector(1) * p - convection + force # -nabla(p) - nabla.(u.nabla_u) + f
-        return f_mesh.nabla_vector(1) * p - convection  # -nabla(p) - nabla.(u.nabla_u)
-
-
-class NSPressureConvection(NonlinearOperator):
-    r"""
-    Operator for Navier-Stokes pressure convection.
-        It is defined as $-\nabla (\nabla^{-2} \nabla \cdot (\left(\mathbf{u}\cdot\nabla\right)\mathbf{u}-f))-\left(\mathbf{u}\cdot\nabla\right)\mathbf{u} + \mathbf{f}$.
-        Note that this class is an operator wrapper. The real implementation of the source term is in the `_NSPressureConvectionCore` class.
-    
-    Args:
-        external_force: Optional[OperatorLike], optional, default=None
-    """
-
-    def __init__(self, external_force: Optional[OperatorLike] = None) -> None:
-        super().__init__(_NSPressureConvectionCore(external_force))

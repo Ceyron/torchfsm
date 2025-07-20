@@ -9,4 +9,3 @@ from ._source import ImplicitSource
 from ._spatial_derivative import SpatialDerivative
 from ._dispersion import Dispersion
 from ._hyper_diffusion import HyperDiffusion
-from ._leray import Leray

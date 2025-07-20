@@ -1,8 +1,8 @@
 import torch
 from torch import Tensor
-from ...mesh import FourierMesh
-from .._base import LinearCoef, NonlinearOperator, CoreGenerator, NonlinearFunc
-from ..._type import FourierTensor, SpatialTensor
+from ....mesh import FourierMesh
+from ..._base import LinearCoef, NonlinearOperator, CoreGenerator, NonlinearFunc
+from ...._type import FourierTensor, SpatialTensor
 from typing import Optional, Union
 
 class _LerayCore(NonlinearFunc):
