@@ -54,21 +54,6 @@ def KuramotoSivashinskyHighDim() -> Operator:
     """
     return -Laplacian() - Biharmonic() - KSConvection()
 
-def KortewegDeVries(dispersion_coef=1, convection_coef: float = 6.0) -> Operator:
-    r"""
-    Korteweg-De Vries equation:
-        $$\frac{\partial \phi}{\partial t}=-c_1\frac{\partial^3 \phi}{\partial x^3} + c_2 \phi\frac{\partial\phi}{\partial x}$$
-
-    Args:
-        dispersion_coef (float): Dispersion coefficient. Default is 1.
-        convection_coef (float): Convection coefficient. Default is 6.0.
-
-    Returns:
-        Operator: The operator representing the Korteweg-De Vries equation.    
-
-    """
-    return -dispersion_coef * SpatialDerivative(0, 3) + convection_coef * Convection()
-
 def NavierStokesVorticity(Re:Union[float,Tensor],force:Optional[Operator]=None)->Operator:
     r"""
     Navier-Stokes equation in vorticity form:
