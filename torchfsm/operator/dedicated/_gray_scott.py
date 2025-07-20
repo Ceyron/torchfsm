@@ -95,9 +95,7 @@ class GrayScottSource(NonlinearOperator):
     
     r"""
     The Gray-Scott source term operator for a two-channel field.
-    It is defined as:
-    $$\frac{\partial \phi_0}{\partial t} = f (1 - \phi_0) - \phi_0 \phi_1^2$$
-    $$\frac{\partial \phi_1}{\partial t} = \phi_0 \phi_1^2 - (f + k) \phi_1$$       
+    It is defined as: $\left[\begin{matrix}f (1 - \phi_0) - \phi_0 \phi_1^2 \\ \phi_0 \phi_1^2 - (f + k) \phi_1 \end{matrix}\right]$
     Note that this class is an operator wrapper. The real implementation of the source term is in the `_GrayScottSource` class.
     """
 
