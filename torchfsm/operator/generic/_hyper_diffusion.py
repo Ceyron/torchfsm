@@ -16,10 +16,10 @@ class _HyperDiffusionCore(LinearCoef):
 
 class HyperDiffusion(LinearOperator):
     r"""
-    `Laplacian` calculates the Laplacian of a vector field.
+    `HyperDiffusion` calculates the hyper diffusion of a vector field.
 
-    It is defined as $\nabla^4\mathbf{u} = \left[\begin{matrix}\sum_i \frac{\partial^4 u_x}{\partial i^4 } \\\sum_i \frac{\partial^4 u_y}{\partial i^4 } \\\cdots \\\sum_i \frac{\partial^4 u_i}{\partial i^4 } \\\end{matrix}\right]$
-    Note that this class is an operator wrapper. The actual implementation of the operator is in the `_LaplacianCore` class.
+    It is defined as $\nabla^4\mathbf{u} = \left[\begin{matrix}\sum_i \frac{\partial^4 u_x}{\partial i^4 } \\\sum_i \frac{\partial^4 u_y}{\partial i^4 } \\\cdots \\\sum_i \frac{\partial^4 u_I}{\partial i^4 } \\\end{matrix}\right]$
+    Note that this class is an operator wrapper. The actual implementation of the operator is in the `_HyperDiffusionCore` class.
     """
 
     def __init__(self) -> None:

@@ -22,7 +22,7 @@ class Dispersion(LinearOperator):
     r"""
     `Dispersion` calculates the Laplacian of a vector field.
 
-    It is defined as $\nabla \cdot (\nabla^2\mathbf{u}) = \sum_j^I \frac{\partial}{\partial j}\sum_i^I \frac{\partial^2 u_i}{\partial i^2 }$
+    It is defined as $\nabla \cdot (\nabla^2\mathbf{u}) = \left[\begin{matrix}\sum_j^I \frac{\partial}{\partial j}\sum_i^I \frac{\partial^2 u_x}{\partial i^2 } \\ \sum_j^I \frac{\partial}{\partial j}\sum_i^I \frac{\partial^2 u_y}{\partial i^2 } \\ \cdots \\ \sum_j^I \frac{\partial}{\partial j}\sum_i^I \frac{\partial^2 u_I}{\partial i^2 } \\ \end{matrix} \right]$
     Note that this class is an operator wrapper. The actual implementation of the operator is in the `_LaplacianCore` class.
     """
 
