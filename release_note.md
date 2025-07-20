@@ -1,3 +1,5 @@
+TorchFSM 0.0.5 Release Notes
+
 ## Feature Addition
 * Add `Dispersion`, `HyperDiffusion`, `Leray`, `ChannelWisedDiffusion`, `GrayScottSource` operators.
 * Add `KPPFisher`, `SwiftHohenberg`, `GrayScott` equations.
@@ -27,6 +29,9 @@
 * Fix type convert issue in traj postprocess funcs (5e4757597b65102c7764ab64822f518a62b14543).
 * Fix cmap error for rendering 3d field (917653ac15676dbec13f2cfeecf273308787ca4a)
 
+Update by @qiauil 
+
+TorchFSM 0.0.4 Release Notes
 ## Performance Improvement
 * Add garbage clean to optimize memory usage in 5815dc09d46a39b39b4e5b46387e32cd895caf08
 * Make LR in ETDRK integrator a non-attribute variable to optimize memory performance in 74744e77c13b6390cea56e4ccbaa4e66cd8dc0a0
