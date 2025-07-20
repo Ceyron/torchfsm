@@ -118,6 +118,26 @@ def div(
 
     return Div()(u=u, u_fft=u_fft, mesh=mesh)
 
+def dispersion(
+    u: Optional[SpatialTensor["B C H ..."]] = None,
+    u_fft: Optional[FourierTensor["B C H ..."]] = None,
+    mesh: Optional[
+        Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh]
+    ] = None,
+) -> SpatialTensor["B C H ..."]:
+    r"""
+    Function form for the dispersion operator.
+        For details, see `torchfsm.operator.Dispersion`.
+
+    Args:
+        u (Optional[SpatialTensor["B C H ..."]]): The input field.
+        u_fft (Optional[FourierTensor["B C H ..."]]): The Fourier-transformed input field.
+        mesh (Optional[Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh]]): The mesh for the field.
+
+    Returns:
+        SpatialTensor["B C H ..."]: The result of applying the dispersion operator to the input field.
+    """
+    return Dispersion()(u=u, u_fft=u_fft, mesh=mesh)
 
 def grad(
     u: Optional[SpatialTensor["B C H ..."]] = None,
@@ -141,6 +161,26 @@ def grad(
 
     return Grad()(u=u, u_fft=u_fft, mesh=mesh)
 
+def hyper_diffusion(
+    u: Optional[SpatialTensor["B C H ..."]] = None,
+    u_fft: Optional[FourierTensor["B C H ..."]] = None,
+    mesh: Optional[
+        Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh]
+    ] = None,
+) -> SpatialTensor["B C H ..."]:
+    r"""
+    Function form for the hyper diffusion operator.
+        For details, see `torchfsm.operator.HyperDiffusion`.
+
+    Args:
+        u (Optional[SpatialTensor["B C H ..."]]): The input field.
+        u_fft (Optional[FourierTensor["B C H ..."]]): The Fourier-transformed input field.
+        mesh (Optional[Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh]]): The mesh for the field.
+
+    Returns:
+        SpatialTensor["B C H ..."]: The result of applying the hyper diffusion operator to the input field.
+    """
+    return HyperDiffusion()(u=u, u_fft=u_fft, mesh=mesh)
 
 def laplacian(
     u: Optional[SpatialTensor["B C H ..."]] = None,
@@ -359,3 +399,24 @@ def vorticity2pressure(
         )
     convection = Div()(u_fft=convection, mesh=f_mesh, return_in_fourier=True)
     return Laplacian().solve(b_fft=-1 * convection, mesh=f_mesh, n_channel=1)
+
+def leray(
+    u: Optional[SpatialTensor["B C H ..."]] = None,
+    u_fft: Optional[FourierTensor["B C H ..."]] = None,
+    mesh: Optional[
+        Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh]
+    ] = None,
+) -> SpatialTensor["B C H ..."]:
+    r"""
+    Function form for the Leray operator.
+        For details, see `torchfsm.operator.Leray`.
+
+    Args:
+        u (Optional[SpatialTensor["B C H ..."]]): The input field.
+        u_fft (Optional[FourierTensor["B C H ..."]]): The Fourier-transformed input field.
+        mesh (Optional[Union[Sequence[tuple[float, float, int]], MeshGrid, FourierMesh]]): The mesh for the field.
+
+    Returns:
+        SpatialTensor["B C H ..."]: The result of applying the Leray operator to the input field.
+    """
+    return Leray()(u=u, u_fft=u_fft, mesh=mesh)
