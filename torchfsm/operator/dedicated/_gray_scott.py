@@ -46,7 +46,7 @@ class ChannelWisedDiffusion(LinearOperator):
     def __init__(self,viscosities: Sequence[Union[Tensor, float]]):
         super().__init__(_ChannelWisedDiffusionGenerator(viscosities))
 
-class _GrayScottSource(NonlinearFunc):
+class _GrayScottSourceCore(NonlinearFunc):
 
     r"""
     Implementation of the Gray-Scott source term.
@@ -89,7 +89,7 @@ class _GrayScottSourceGenerator(CoreGenerator):
     def __call__(self, f_mesh: FourierMesh, n_channel: int) -> NonlinearFunc:
         if n_channel != 2:
             raise ValueError(f"Gray-Scott source term requires exactly 2 channels, got {n_channel}.")
-        return _GrayScottSource(self.feed_rate, self.kill_rate)
+        return _GrayScottSourceCore(self.feed_rate, self.kill_rate)
 
 class GrayScottSource(NonlinearOperator):
     

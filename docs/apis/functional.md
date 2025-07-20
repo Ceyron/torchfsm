@@ -8,7 +8,11 @@
 ---
 ::: torchfsm.functional.div
 ---
+::: torchfsm.functional.dispersion
+---
 ::: torchfsm.functional.grad
+---
+::: torchfsm.functional.hyper_diffusion
 ---
 ::: torchfsm.functional.laplacian
 ---
@@ -23,3 +27,5 @@
 ::: torchfsm.functional.vorticity2pressure
 ---
 ::: torchfsm.functional.velocity2pressure
+---
+::: torchfsm.functional.leray

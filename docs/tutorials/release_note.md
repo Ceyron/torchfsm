@@ -1,3 +1,6 @@
+## 0.0.3 (TorchFSM 0.0.5)
+* Add new section for new operators, equations and functions (see code release note).
+
 ## 0.0.2 (TorchFSM 0.0.4)
 * Add new section `3.3.1. Simulation with Batched Parameters`.
 * Add new section `3.3.2. Choose Integrator`.

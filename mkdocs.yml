@@ -120,9 +120,15 @@ nav:
                     - "Burgers": 'tutorials/simulation/gallery/burgers.ipynb'
                     - "Korteweg de Vries": 'tutorials/simulation/gallery/korteweg_de_vries.ipynb'
                     - "Kuramoto Sivashinsky": "tutorials/simulation/gallery/kuramoto_sivashinsky.ipynb"
-                - "3.2.1. Navier-Stokes Simulation":
-                    - "2.3.4.1 Vorticity Based": 'tutorials/simulation/gallery/ns_vorticity.ipynb'
-                    - "2.3.4.1 Velocity Based": 'tutorials/simulation/gallery/ns_velocity.ipynb'
+                    - "Dispersion": 'tutorials/simulation/gallery/dispersion.ipynb'
+                    - "HyperDiffusion": 'tutorials/simulation/gallery/hyper_diffusion.ipynb'
+                - "3.2.2. Reaction-Diffusion Systems":
+                    - "Gray Scott": 'tutorials/simulation/gallery/gray_scott.ipynb'
+                    - "KPP Fisher": 'tutorials/simulation/gallery/kpp_fisher.ipynb'
+                    - "Swift Hohenberg": 'tutorials/simulation/gallery/swift_hohenberg.ipynb'
+                - "3.2.3. Navier-Stokes Simulation":
+                    - "3.2.3.1 Vorticity Based": 'tutorials/simulation/gallery/ns_vorticity.ipynb'
+                    - "3.2.3.2 Velocity Based": 'tutorials/simulation/gallery/ns_velocity.ipynb'
             - "3.3 Advanced Techniques":
                 - "3.3.1. Simulation with Batched Parameters": 'tutorials/simulation/advanced_tech/batched_para.ipynb'
                 - "3.3.2. Choose Integrator": 'tutorials/simulation/advanced_tech/choose_integrator.ipynb'
@@ -138,9 +144,10 @@ nav:
             - 'RK Integrator': 'apis/rk_integrator.md'
         - '5. field': 'apis/field.md'
         - '6. plot': 'apis/plot.md'
-        - '7. traj_recorder': 'apis/traj_recorder.md'
-        - '8. utils': 'apis/utils.md'
-        - '9. Base Classes for Operators': 'apis/operator_base.md'
-        - '10. Cores and Generators for Operators': 
+        - '7. mesh': 'apis/mesh.md'
+        - '8. traj_recorder': 'apis/traj_recorder.md'
+        - '9. utils': 'apis/utils.md'
+        - '10. Base Classes for Operators': 'apis/operator_base.md'
+        - '11. Cores and Generators for Operators': 
             - 'Cores': 'apis/operator_core.md'
             - 'Generators': 'apis/operator_generator.md'

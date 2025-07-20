@@ -10,6 +10,8 @@
 ---
 ::: torchfsm.operator.generic._div._DivCore
 ---
+::: torchfsm.operator.generic._dispersion._DispersionCore
+---
 ::: torchfsm.operator.generic._grad._GradCore
 ---
 ::: torchfsm.operator._base._ExplicitSourceCore
@@ -18,18 +20,26 @@
 ---
 ::: torchfsm.operator.generic._source._ImplicitFuncSourceCore
 ---
+::: torchfsm.operator.generic._hyper_diffusion._HyperDiffusionCore
+---
 ::: torchfsm.operator.generic._laplacian._LaplacianCore
 ---
 ::: torchfsm.operator.generic._spatial_derivative._SpatialDerivativeCore
 ---
 ::: torchfsm.operator.dedicated._ks_convection._KSConvectionCore
 ---
-::: torchfsm.operator.dedicated._navier_stokes._VorticityConvectionCore
+::: torchfsm.operator.dedicated._navier_stokes._vorticity_convection._VorticityConvectionCore
 ---
-::: torchfsm.operator.dedicated._navier_stokes._Vorticity2VelocityCore
+::: torchfsm.operator.dedicated._navier_stokes._value_transformation._Vorticity2VelocityCore
 ---
-::: torchfsm.operator.dedicated._navier_stokes._Vorticity2PressureCore
+::: torchfsm.operator.dedicated._navier_stokes._value_transformation._Vorticity2PressureCore
 ---
-::: torchfsm.operator.dedicated._navier_stokes._Velocity2PressureCore
+::: torchfsm.operator.dedicated._navier_stokes._value_transformation._Velocity2PressureCore
 ---
-::: torchfsm.operator.dedicated._navier_stokes._NSPressureConvectionCore
+::: torchfsm.operator.dedicated._navier_stokes._ns_pressure_convection._NSPressureConvectionCore
+---
+::: torchfsm.operator.dedicated._navier_stokes._leray._LerayCore
+---
+::: torchfsm.operator.dedicated._gray_scott._ChannelWisedDiffusionCore
+---
+::: torchfsm.operator.dedicated._gray_scott._GrayScottSourceCore

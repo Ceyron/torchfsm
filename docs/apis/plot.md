@@ -8,3 +8,6 @@
 ---
 ::: torchfsm.plot.plot_field
 ---
+::: torchfsm.plot.plot_traj_frames
+---
+::: torchfsm.plot.plot_3d_traj_slices

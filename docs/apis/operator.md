@@ -10,12 +10,16 @@ Operators are the core of the torchfsm library. Each operator represents a speci
 ::: torchfsm.operator.Curl
 ---
 ::: torchfsm.operator.Div
+--- 
+::: torchfsm.operator.Dispersion
 ---
 ::: torchfsm.operator.Grad
 ---
 ::: torchfsm.operator.ExplicitSource
 ---
 ::: torchfsm.operator.ImplicitSource
+---
+::: torchfsm.operator.HyperDiffusion
 ---
 ::: torchfsm.operator.Laplacian
 ---
@@ -32,6 +36,13 @@ Operators are the core of the torchfsm library. Each operator represents a speci
 ::: torchfsm.operator.Velocity2Pressure
 ---
 ::: torchfsm.operator.NSPressureConvection
+---
+::: torchfsm.operator.Leray
+---
+::: torchfsm.operator.ChannelWisedDiffusion
+---
+::: torchfsm.operator.GrayScottSource
+
 
 
 ## Utils

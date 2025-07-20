@@ -12,8 +12,14 @@
 ---
 ::: torchfsm.operator.dedicated._ks_convection._KSConvectionGenerator
 ---
-::: torchfsm.operator.dedicated._navier_stokes._VorticityConvectionGenerator
+::: torchfsm.operator.dedicated._navier_stokes._vorticity_convection._VorticityConvectionGenerator
 ---
-::: torchfsm.operator.dedicated._navier_stokes._Vorticity2VelocityGenerator
+::: torchfsm.operator.dedicated._navier_stokes._value_transformation._Vorticity2VelocityGenerator
 ---
-::: torchfsm.operator.dedicated._navier_stokes._Vorticity2PressureGenerator
+::: torchfsm.operator.dedicated._navier_stokes._value_transformation._Vorticity2PressureGenerator
+---
+::: torchfsm.operator.dedicated._navier_stokes._leray._LerayGenerator
+---
+::: torchfsm.operator.dedicated._gray_scott._ChannelWisedDiffusionGenerator
+---
+::: torchfsm.operator.dedicated._gray_scott._GrayScottSourceGenerator
